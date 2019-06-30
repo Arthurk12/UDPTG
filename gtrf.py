@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import sys, time
+import sys, time, timeit
 from socket import *
 
 BYTE_SIZE_IN_BITS = 8
@@ -47,9 +47,9 @@ def paramError():
     sys.exit()
 
 def UDPtrafficGenerator(targetIP, targetPort, traffic):
-    packet_size_in_bytes = 128
+    packet_size_in_bytes = 2048
     packet_size_in_bits = packet_size_in_bytes * 8
-    numberOfBursts = ((traffic*1024)/(packet_size_in_bits))
+    numberOfBursts = ((traffic*1000)/(packet_size_in_bits))
     sleepTime = float(1/numberOfBursts)
 
     tsocket = socket(AF_INET, SOCK_DGRAM) 
@@ -57,13 +57,12 @@ def UDPtrafficGenerator(targetIP, targetPort, traffic):
     print(str(sleepTime) + " | " + str(numberOfBursts))
 
     while 1:
-        start = time.time()
+        start = timeit.default_timer()
         tsocket.sendto(bytes(packet_size_in_bytes), (targetIP, targetPort))
-        end = time.time() - start
-        sleepTime = sleepTime - end
+        timeSpent = timeit.default_timer() - start
 
-        if(sleepTime > 0):
-            time.sleep(sleepTime)
+        if(sleepTime > timeSpent):
+                time.sleep(sleepTime - timeSpent)
         
 
 targetIP, targetPort, traffic = readArgs()
